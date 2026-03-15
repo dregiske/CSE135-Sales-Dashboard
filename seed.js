@@ -44,7 +44,6 @@ if (!cols.includes("sections")) {
 }
 
 // ── Seed Users ────────────────────────────────────
-const hashedPassword = bcrypt.hashSync("admin123", 10);
 
 const insertUser = db.prepare(`
     INSERT OR IGNORE INTO users (username, password, role, sections) 
