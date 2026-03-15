@@ -10,6 +10,10 @@ const dashboardController = require("../controllers/dashboardController");
 const ordersController = require("../controllers/ordersController");
 const customersController = require("../controllers/customersController");
 
+router.get("/reports", isAuthenticated, (req, res) => {
+  res.render("reports", { user: req.session.user });
+});
+
 router.get(
   "/",
   isAuthenticated,
