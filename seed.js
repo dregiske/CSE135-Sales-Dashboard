@@ -4,16 +4,8 @@ const bcrypt = require("bcrypt");
 
 const db = new Database("./database.db");
 
-// ── Create Tables ─────────────────────────────────
+// ── Create Tables (customers and orders only — users already exists) ──
 db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
-	role TEXT NOT NULL DEFAULT 'viewer',
-	sections TEXT NOT NULL DEFAULT '[]'
-    );
-
     CREATE TABLE IF NOT EXISTS customers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -32,7 +24,7 @@ db.exec(`
     );
 `);
 
-// ── Migrate existing users table if columns missing ──
+// ── Migrate users table if columns missing ────────────────────────────
 const cols = db.pragma("table_info(users)").map((c) => c.name);
 if (!cols.includes("role")) {
   db.exec(`ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'viewer'`);
@@ -43,38 +35,30 @@ if (!cols.includes("sections")) {
   console.log("Migrated: added sections column");
 }
 
-// ── Seed Users ────────────────────────────────────
-
+// ── Seed Users ────────────────────────────────────────────────────────
 const insertUser = db.prepare(`
-    INSERT OR IGNORE INTO users (username, password, role, sections) 
+    INSERT OR IGNORE INTO users (username, password, role, sections)
     VALUES (?, ?, ?, ?)
 `);
 
-// Super Admin
 insertUser.run(
   "superadmin",
   bcrypt.hashSync("super123", 10),
   "superadmin",
   JSON.stringify(["revenue", "products", "regional"]),
 );
-
-// Example analyst Sam
 insertUser.run(
   "sam",
   bcrypt.hashSync("sam123", 10),
   "analyst",
   JSON.stringify(["revenue", "products"]),
 );
-
-// Example analyst Sally
 insertUser.run(
   "sally",
   bcrypt.hashSync("sally123", 10),
   "analyst",
   JSON.stringify(["revenue", "regional"]),
 );
-
-// Viewer
 insertUser.run(
   "viewer",
   bcrypt.hashSync("viewer123", 10),
@@ -82,9 +66,9 @@ insertUser.run(
   JSON.stringify([]),
 );
 
-// ── Seed Customers ────────────────────────────────
+// ── Seed Customers ────────────────────────────────────────────────────
 const insertCustomer = db.prepare(`
-    INSERT OR IGNORE INTO customers (id, name, email, region) 
+    INSERT OR IGNORE INTO customers (id, name, email, region)
     VALUES (?, ?, ?, ?)
 `);
 
@@ -98,10 +82,9 @@ const customers = [
   [7, "Edward Moore", "edward@email.com", "East"],
   [8, "Fiona Taylor", "fiona@email.com", "West"],
 ];
-
 customers.forEach((c) => insertCustomer.run(...c));
 
-// ── Seed Orders ───────────────────────────────────
+// ── Seed Orders ───────────────────────────────────────────────────────
 const insertOrder = db.prepare(`
     INSERT OR IGNORE INTO orders (id, customer_id, product, amount, status, order_date)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -129,10 +112,10 @@ const orders = [
   [19, 3, "Widget E", 499.99, "completed", "2024-04-15"],
   [20, 4, "Widget A", 299.99, "pending", "2024-04-20"],
 ];
-
 orders.forEach((o) => insertOrder.run(...o));
 
-console.log("Database seeded successfully");
+console.log("\nDatabase seeded successfully");
+console.log("─────────────────────────────────────────────────");
 console.log("superadmin / super123  (role: superadmin)");
 console.log("sam        / sam123    (role: analyst — revenue, products)");
 console.log("sally      / sally123  (role: analyst — revenue, regional)");
