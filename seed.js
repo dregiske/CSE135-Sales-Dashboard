@@ -10,6 +10,8 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL
+	role TEXT NOT NULL DEFAULT 'viewer',
+	sections TEXT NOT NULL DEFAULT '[]'
     );
 
     CREATE TABLE IF NOT EXISTS customers (
@@ -30,14 +32,42 @@ db.exec(`
     );
 `);
 
+// ── Migrate existing users table if columns missing ──
+const cols = db.pragma('table_info(users)').map(c => c.name);
+if (!cols.includes('role')) {
+    db.exec(`ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'viewer'`);
+    console.log('Migrated: added role column');
+}
+if (!cols.includes('sections')) {
+    db.exec(`ALTER TABLE users ADD COLUMN sections TEXT NOT NULL DEFAULT '[]'`);
+    console.log('Migrated: added sections column');
+}
+
 // ── Seed Users ────────────────────────────────────
 const hashedPassword = bcrypt.hashSync('admin123', 10);
 
 const insertUser = db.prepare(`
-    INSERT OR IGNORE INTO users (username, password) 
-    VALUES (?, ?)
+    INSERT OR IGNORE INTO users (username, password, role, sections) 
+    VALUES (?, ?, ?, ?)
 `);
 
+// Super Admin
+insertUser.run('superadmin', bcrypt.hashSync('super123', 10), 
+    'superadmin', JSON.stringify(['revenue', 'products', 'regional']));
+
+// Example analyst Sam
+insertUser.run('sam', bcrypt.hashSync('sam123', 10), 
+    'analyst', JSON.stringify(['revenue', 'products']));
+
+// Example analyst Sally
+insertUser.run('sally', bcrypt.hashSync('sally123', 10), 
+    'analyst', JSON.stringify(['revenue', 'regional']));
+
+// Viewer
+insertUser.run('viewer', bcrypt.hashSync('viewer123', 10),
+    'viewer', JSON.stringify([]));
+
+// MVC admin
 insertUser.run('admin', hashedPassword);
 
 // ── Seed Customers ────────────────────────────────
@@ -91,5 +121,7 @@ const orders = [
 orders.forEach(o => insertOrder.run(...o));
 
 console.log('Database seeded successfully');
-console.log('Username: admin');
-console.log('Password: admin123');
+console.log('superadmin / super123  (role: superadmin)');
+console.log('sam        / sam123    (role: analyst — revenue, products)');
+console.log('sally      / sally123  (role: analyst — revenue, regional)');
+console.log('viewer     / viewer123 (role: viewer)');
