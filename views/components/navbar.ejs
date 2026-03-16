@@ -1,9 +1,17 @@
 <nav>
     <div class="nav-brand">Sales Dashboard</div>
     <ul>
-        <li><a href="/dashboard">Dashboard</a></li>
-        <li><a href="/orders">Orders</a></li>
-        <li><a href="/customers">Customers</a></li>
-        <li><a href="/logout">Logout (<%= user.username %>)</a></li>
+        <% if (user.role === 'superadmin' || user.role === 'analyst') { %>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/orders">Orders</a></li>
+            <li><a href="/customers">Customers</a></li>
+        <% } %>
+        <% if (user.role === 'analyst' || user.role === 'viewer') { %>
+            <li><a href="/reports">Reports</a></li>
+        <% } %>
+        <% if (user.role === 'superadmin') { %>
+            <li><a href="/admin">Admin</a></li>
+        <% } %>
+        <li><a href="/logout" class="logout">Logout (<%= user.username %>)</a></li>
     </ul>
 </nav>
