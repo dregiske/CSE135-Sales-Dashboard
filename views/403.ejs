@@ -2,21 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>403 — Access Denied</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="login-container">
-        <h1>403</h1>
-        <h2>Access Denied</h2>
-        <p>You don't have permission to view this page.</p>
-        <% if (user && user.role === 'viewer') { %>
-            <a href="/reports">← Back to Reports</a>
-        <% } else if (user && user.role === 'superadmin') { %>
-            <a href="/admin">← Back to Admin</a>
-        <% } else { %>
-            <a href="/dashboard">← Back to Dashboard</a>
-        <% } %>
+    <div class="login-page">
+        <div class="error-container">
+            <div class="error-code">403</div>
+            <p class="error-message">Access Denied</p>
+            <p>You don't have permission to view this page.</p>
+            <br>
+            <% if (user && user.role === 'viewer') { %>
+                <a href="/reports">← Back to Reports</a>
+            <% } else if (user && user.role === 'superadmin') { %>
+                <a href="/admin">← Back to Admin</a>
+            <% } else { %>
+                <a href="/dashboard">← Back to Dashboard</a>
+            <% } %>
+        </div>
     </div>
 </body>
 </html>

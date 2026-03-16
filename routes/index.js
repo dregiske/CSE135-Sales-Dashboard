@@ -9,10 +9,10 @@ const {
 const dashboardController = require("../controllers/dashboardController");
 const ordersController = require("../controllers/ordersController");
 const customersController = require("../controllers/customersController");
+const reportsController = require("../controllers/reportsController");
 
-router.get("/reports", isAuthenticated, (req, res) => {
-  res.render("reports", { user: req.session.user });
-});
+router.get("/reports", isAuthenticated, reportsController.showReports);
+router.post("/reports/comment", isAuthenticated, requireRole(["superadmin", "analyst"]), reportsController.saveComment);
 
 router.get(
   "/",
