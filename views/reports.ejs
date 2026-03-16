@@ -4,17 +4,17 @@
 <div class="container">
   <div class="page-header">
     <h1>Saved <span>Reports</span></h1>
-    <div style="display:flex; align-items:center; gap:16px;">
-      <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
+    <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
+      <div style="display:flex; align-items:center; gap:16px;">
         <span style="font-size:0.8em; color:var(--text-muted);">Click <strong style="color:var(--accent)">Save Comment</strong> on any section to annotate</span>
         <a href="/reports/export" class="btn-export">Export PDF</a>
-      <% } %>
-    </div>
+      </div>
+    <% } %>
   </div>
 
-  <!-- ── Saved Reports List ── -->
+  <!-- ── Saved Reports List (all roles) ── -->
   <section class="report-section">
-    <h2><% if (user.role === 'viewer') { %>Available Reports<% } else { %>Previously Exported Reports<% } %></h2>
+    <h2><%= user.role === 'viewer' ? 'Available Reports' : 'Previously Exported Reports' %></h2>
     <% if (savedReports.length === 0) { %>
       <p style="color:var(--text-muted); font-style:italic;">No reports have been exported yet.</p>
     <% } else { %>
@@ -43,250 +43,184 @@
     <% } %>
   </section>
 
-  <% if (user.role === 'viewer') { %>
-  </div>
-  <%- include('components/footer') %>
-  <% } %>
-
   <% if (user.role !== 'viewer') { %>
-  <!-- ── 1. Revenue Summary ── -->
-  <% if (user.role === 'superadmin' || user.sections.includes('revenue')) { %>
-  <section id="revenue" class="report-section">
-    <h2>1. Revenue Summary</h2>
-    <p class="report-desc">Monthly completed-order revenue — tracks growth trends over time.</p>
 
-    <div class="report-grid">
-      <div class="chart-container">
-        <h3>Monthly Revenue</h3>
-        <canvas id="monthlyRevenueChart"></canvas>
+    <!-- ── 1. Revenue Summary ── -->
+    <% if (user.role === 'superadmin' || user.sections.includes('revenue')) { %>
+    <section id="revenue" class="report-section">
+      <h2>1. Revenue Summary</h2>
+      <p class="report-desc">Monthly completed-order revenue — tracks growth trends over time.</p>
+      <div class="report-grid">
+        <div class="chart-container">
+          <h3>Monthly Revenue</h3>
+          <canvas id="monthlyRevenueChart"></canvas>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Month</th><th>Revenue</th></tr></thead>
+            <tbody>
+              <% monthlyRevenueTable.forEach(row => { %>
+                <tr>
+                  <td><%= row.month %></td>
+                  <td>$<%= row.total_revenue.toFixed(2) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Revenue</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% monthlyRevenueTable.forEach(row => { %>
-              <tr>
-                <td><%= row.month %></td>
-                <td>$<%= row.total_revenue.toFixed(2) %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="comment-block">
-      <h3>Analyst Comment</h3>
-      <% if (comments.revenue && comments.revenue.comment) { %>
-        <p class="comment-text"><%= comments.revenue.comment %></p>
-        <% if (comments.revenue.updated_by) { %>
-          <span class="comment-meta">— <%= comments.revenue.updated_by %>, <%= comments.revenue.updated_at %></span>
+      <div class="comment-block">
+        <h3>Analyst Comment</h3>
+        <% if (comments.revenue && comments.revenue.comment) { %>
+          <p class="comment-text"><%= comments.revenue.comment %></p>
+          <% if (comments.revenue.updated_by) { %>
+            <span class="comment-meta">— <%= comments.revenue.updated_by %>, <%= comments.revenue.updated_at %></span>
+          <% } %>
+        <% } else { %>
+          <p class="comment-text comment-empty">No analyst comment yet.</p>
         <% } %>
-      <% } else { %>
-        <p class="comment-text comment-empty">No analyst comment yet.</p>
-      <% } %>
-
-      <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
-        <form method="POST" action="/reports/comment" class="comment-form">
-          <input type="hidden" name="section" value="revenue" />
-          <textarea name="comment" rows="3" placeholder="Add your analysis of the revenue trends..."><%= comments.revenue ? comments.revenue.comment : '' %></textarea>
-          <button type="submit" class="btn-save">Save Comment</button>
-        </form>
-      <% } %>
-    </div>
-  </section>
-  <% } %>
-
-  <!-- ── 2. Orders Analysis ── -->
-  <% if (user.role === 'superadmin' || user.sections.includes('orders')) { %>
-  <section id="orders" class="report-section">
-    <h2>2. Orders Analysis</h2>
-    <p class="report-desc">Breakdown of orders by status — highlights fulfillment health and cancellation rate.</p>
-
-    <div class="report-grid">
-      <div class="chart-container">
-        <h3>Orders by Status</h3>
-        <canvas id="ordersByStatusChart"></canvas>
-      </div>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% ordersByStatusTable.forEach(row => { %>
-              <tr>
-                <td>
-                  <span class="badge badge-<%= row.status %>"><%= row.status %></span>
-                </td>
-                <td><%= row.count %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="comment-block">
-      <h3>Analyst Comment</h3>
-      <% if (comments.orders && comments.orders.comment) { %>
-        <p class="comment-text"><%= comments.orders.comment %></p>
-        <% if (comments.orders.updated_by) { %>
-          <span class="comment-meta">— <%= comments.orders.updated_by %>, <%= comments.orders.updated_at %></span>
+        <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
+          <form method="POST" action="/reports/comment" class="comment-form">
+            <input type="hidden" name="section" value="revenue" />
+            <textarea name="comment" rows="3" placeholder="Add your analysis of the revenue trends..."><%= comments.revenue ? comments.revenue.comment : '' %></textarea>
+            <button type="submit" class="btn-save">Save Comment</button>
+          </form>
         <% } %>
-      <% } else { %>
-        <p class="comment-text comment-empty">No analyst comment yet.</p>
-      <% } %>
-
-      <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
-        <form method="POST" action="/reports/comment" class="comment-form">
-          <input type="hidden" name="section" value="orders" />
-          <textarea name="comment" rows="3" placeholder="Describe order fulfillment patterns..."><%= comments.orders ? comments.orders.comment : '' %></textarea>
-          <button type="submit" class="btn-save">Save Comment</button>
-        </form>
-      <% } %>
-    </div>
-  </section>
-  <% } %>
-
-  <!-- ── 3. Regional Performance ── -->
-  <% if (user.role === 'superadmin' || user.sections.includes('regional')) { %>
-  <section id="regional" class="report-section">
-    <h2>3. Regional Performance</h2>
-    <p class="report-desc">Completed revenue by customer region — identifies top-performing markets.</p>
-
-    <div class="report-grid">
-      <div class="chart-container">
-        <h3>Revenue by Region</h3>
-        <canvas id="revenueByRegionChart"></canvas>
       </div>
+    </section>
+    <% } %>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Region</th>
-              <th>Revenue</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% revenueByRegionTable.forEach(row => { %>
-              <tr>
-                <td><%= row.region %></td>
-                <td>$<%= row.total_revenue.toFixed(2) %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+    <!-- ── 2. Orders Analysis ── -->
+    <% if (user.role === 'superadmin' || user.sections.includes('orders')) { %>
+    <section id="orders" class="report-section">
+      <h2>2. Orders Analysis</h2>
+      <p class="report-desc">Breakdown of orders by status — highlights fulfillment health and cancellation rate.</p>
+      <div class="report-grid">
+        <div class="chart-container">
+          <h3>Orders by Status</h3>
+          <canvas id="ordersByStatusChart"></canvas>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Status</th><th>Count</th></tr></thead>
+            <tbody>
+              <% ordersByStatusTable.forEach(row => { %>
+                <tr>
+                  <td><span class="badge badge-<%= row.status %>"><%= row.status %></span></td>
+                  <td><%= row.count %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-
-    <div class="comment-block">
-      <h3>Analyst Comment</h3>
-      <% if (comments.regional && comments.regional.comment) { %>
-        <p class="comment-text"><%= comments.regional.comment %></p>
-        <% if (comments.regional.updated_by) { %>
-          <span class="comment-meta">— <%= comments.regional.updated_by %>, <%= comments.regional.updated_at %></span>
+      <div class="comment-block">
+        <h3>Analyst Comment</h3>
+        <% if (comments.orders && comments.orders.comment) { %>
+          <p class="comment-text"><%= comments.orders.comment %></p>
+          <% if (comments.orders.updated_by) { %>
+            <span class="comment-meta">— <%= comments.orders.updated_by %>, <%= comments.orders.updated_at %></span>
+          <% } %>
+        <% } else { %>
+          <p class="comment-text comment-empty">No analyst comment yet.</p>
         <% } %>
-      <% } else { %>
-        <p class="comment-text comment-empty">No analyst comment yet.</p>
-      <% } %>
+        <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
+          <form method="POST" action="/reports/comment" class="comment-form">
+            <input type="hidden" name="section" value="orders" />
+            <textarea name="comment" rows="3" placeholder="Describe order fulfillment patterns..."><%= comments.orders ? comments.orders.comment : '' %></textarea>
+            <button type="submit" class="btn-save">Save Comment</button>
+          </form>
+        <% } %>
+      </div>
+    </section>
+    <% } %>
 
-      <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
-        <form method="POST" action="/reports/comment" class="comment-form">
-          <input type="hidden" name="section" value="regional" />
-          <textarea name="comment" rows="3" placeholder="Summarize regional sales performance..."><%= comments.regional ? comments.regional.comment : '' %></textarea>
-          <button type="submit" class="btn-save">Save Comment</button>
-        </form>
-      <% } %>
-    </div>
-  </section>
-  <% } %>
+    <!-- ── 3. Regional Performance ── -->
+    <% if (user.role === 'superadmin' || user.sections.includes('regional')) { %>
+    <section id="regional" class="report-section">
+      <h2>3. Regional Performance</h2>
+      <p class="report-desc">Completed revenue by customer region — identifies top-performing markets.</p>
+      <div class="report-grid">
+        <div class="chart-container">
+          <h3>Revenue by Region</h3>
+          <canvas id="revenueByRegionChart"></canvas>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Region</th><th>Revenue</th></tr></thead>
+            <tbody>
+              <% revenueByRegionTable.forEach(row => { %>
+                <tr>
+                  <td><%= row.region %></td>
+                  <td>$<%= row.total_revenue.toFixed(2) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="comment-block">
+        <h3>Analyst Comment</h3>
+        <% if (comments.regional && comments.regional.comment) { %>
+          <p class="comment-text"><%= comments.regional.comment %></p>
+          <% if (comments.regional.updated_by) { %>
+            <span class="comment-meta">— <%= comments.regional.updated_by %>, <%= comments.regional.updated_at %></span>
+          <% } %>
+        <% } else { %>
+          <p class="comment-text comment-empty">No analyst comment yet.</p>
+        <% } %>
+        <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
+          <form method="POST" action="/reports/comment" class="comment-form">
+            <input type="hidden" name="section" value="regional" />
+            <textarea name="comment" rows="3" placeholder="Summarize regional sales performance..."><%= comments.regional ? comments.regional.comment : '' %></textarea>
+            <button type="submit" class="btn-save">Save Comment</button>
+          </form>
+        <% } %>
+      </div>
+    </section>
+    <% } %>
 
-  <% if (user.role === 'analyst' && user.sections.length === 0) { %>
-    <p style="color:var(--text-muted); text-align:center; padding: 40px 0;">No report sections have been assigned to your account. Contact an admin.</p>
+    <% if (user.role === 'analyst' && user.sections.length === 0) { %>
+      <p style="color:var(--text-muted); text-align:center; padding: 40px 0;">No report sections have been assigned to your account. Contact an admin.</p>
+    <% } %>
+
   <% } %>
 </div>
-<% } %>
 
+<% if (user.role !== 'viewer') { %>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const monthlyRevenue   = <%- typeof monthlyRevenue !== 'undefined' ? monthlyRevenue : '[]' %>;
-  const ordersByStatus   = <%- typeof ordersByStatus !== 'undefined' ? ordersByStatus : '[]' %>;
-  const revenueByRegion  = <%- typeof revenueByRegion !== 'undefined' ? revenueByRegion : '[]' %>;
+  const monthlyRevenue  = <%- monthlyRevenue %>;
+  const ordersByStatus  = <%- ordersByStatus %>;
+  const revenueByRegion = <%- revenueByRegion %>;
 
   if (document.getElementById('monthlyRevenueChart')) new Chart(document.getElementById('monthlyRevenueChart'), {
     type: 'bar',
     data: {
       labels: monthlyRevenue.map(r => r.month),
-      datasets: [{
-        label: 'Revenue ($)',
-        data: monthlyRevenue.map(r => r.total_revenue),
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-      }],
+      datasets: [{ label: 'Revenue ($)', data: monthlyRevenue.map(r => r.total_revenue), backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }],
     },
-    options: {
-      plugins: { legend: { labels: { color: '#e0e0e0' } } },
-      scales: {
-        x: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } },
-        y: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } },
-      },
-    },
+    options: { plugins: { legend: { labels: { color: '#e0e0e0' } } }, scales: { x: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } }, y: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } } } },
   });
 
   if (document.getElementById('ordersByStatusChart')) new Chart(document.getElementById('ordersByStatusChart'), {
     type: 'doughnut',
     data: {
       labels: ordersByStatus.map(r => r.status),
-      datasets: [{
-        data: ordersByStatus.map(r => r.count),
-        backgroundColor: [
-          'rgba(46, 213, 115, 0.7)',
-          'rgba(255, 193, 7, 0.7)',
-          'rgba(233, 69, 96, 0.7)',
-        ],
-        borderColor: '#1a1a2e',
-        borderWidth: 2,
-      }],
+      datasets: [{ data: ordersByStatus.map(r => r.count), backgroundColor: ['rgba(46, 213, 115, 0.7)', 'rgba(255, 193, 7, 0.7)', 'rgba(233, 69, 96, 0.7)'], borderColor: '#1a1a2e', borderWidth: 2 }],
     },
-    options: {
-      plugins: { legend: { labels: { color: '#e0e0e0' } } },
-    },
+    options: { plugins: { legend: { labels: { color: '#e0e0e0' } } } },
   });
 
   if (document.getElementById('revenueByRegionChart')) new Chart(document.getElementById('revenueByRegionChart'), {
     type: 'bar',
     data: {
       labels: revenueByRegion.map(r => r.region),
-      datasets: [{
-        label: 'Revenue ($)',
-        data: revenueByRegion.map(r => r.total_revenue),
-        backgroundColor: 'rgba(153, 102, 255, 0.6)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1,
-      }],
+      datasets: [{ label: 'Revenue ($)', data: revenueByRegion.map(r => r.total_revenue), backgroundColor: 'rgba(153, 102, 255, 0.6)', borderColor: 'rgba(153, 102, 255, 1)', borderWidth: 1 }],
     },
-    options: {
-      indexAxis: 'y',
-      plugins: { legend: { labels: { color: '#e0e0e0' } } },
-      scales: {
-        x: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } },
-        y: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } },
-      },
-    },
+    options: { indexAxis: 'y', plugins: { legend: { labels: { color: '#e0e0e0' } } }, scales: { x: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } }, y: { ticks: { color: '#a8a8b3' }, grid: { color: '#2a2a4a' } } } },
   });
 </script>
+<% } %>
 
 <%- include('components/footer') %>

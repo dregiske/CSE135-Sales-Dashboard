@@ -55,6 +55,7 @@ exports.exportReportsPDF = async (req, res) => {
         // Save to disk so viewers can access it
         const filename = `report-${Date.now()}.pdf`;
         const exportsDir = path.join(__dirname, '../public/exports');
+        fs.mkdirSync(exportsDir, { recursive: true });
         fs.writeFileSync(path.join(exportsDir, filename), pdf);
 
         // Record in DB
