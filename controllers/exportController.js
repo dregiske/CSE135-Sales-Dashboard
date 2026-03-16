@@ -1,4 +1,9 @@
-const puppeteer = require('puppeteer');
+let puppeteer;
+try {
+    puppeteer = require('puppeteer');
+} catch (e) {
+    console.warn('Puppeteer not installed — PDF export will be unavailable.');
+}
 
 exports.exportReportsPDF = async (req, res) => {
     const port = process.env.PORT;
