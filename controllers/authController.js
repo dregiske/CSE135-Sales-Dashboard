@@ -30,6 +30,7 @@ exports.handleLogin = async (req, res) => {
   };
 
   if (user.role === "viewer") return res.redirect("/reports");
+  if (user.role === "superadmin") return res.redirect("/admin");
   res.redirect("/dashboard");
 };
 
