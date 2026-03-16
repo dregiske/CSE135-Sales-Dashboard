@@ -10,9 +10,11 @@ const dashboardController = require("../controllers/dashboardController");
 const ordersController = require("../controllers/ordersController");
 const customersController = require("../controllers/customersController");
 const reportsController = require("../controllers/reportsController");
+const exportController = require("../controllers/exportController");
 
 router.get("/reports", isAuthenticated, reportsController.showReports);
 router.post("/reports/comment", isAuthenticated, requireRole(["superadmin", "analyst"]), reportsController.saveComment);
+router.get("/reports/export", isAuthenticated, requireRole(["superadmin", "analyst"]), exportController.exportReportsPDF);
 
 router.get(
   "/",
