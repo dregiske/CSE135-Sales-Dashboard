@@ -51,7 +51,7 @@ insertUser.run(
   "sam",
   bcrypt.hashSync("sam123", 10),
   "analyst",
-  JSON.stringify(["revenue", "products"]),
+  JSON.stringify(["revenue", "orders"]),
 );
 insertUser.run(
   "sally",
@@ -117,6 +117,6 @@ orders.forEach((o) => insertOrder.run(...o));
 console.log("\nDatabase seeded successfully");
 console.log("─────────────────────────────────────────────────");
 console.log("superadmin / super123  (role: superadmin)");
-console.log("sam        / sam123    (role: analyst — revenue, products)");
+console.log("sam        / sam123    (role: analyst — revenue, orders)");
 console.log("sally      / sally123  (role: analyst — revenue, regional)");
 console.log("viewer     / viewer123 (role: viewer)");
