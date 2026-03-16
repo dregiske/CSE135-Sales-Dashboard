@@ -43,3 +43,4 @@ Given more time, I would tackle some of these ideas:
 - **Secure export URLs** — add auth checks so exported PDFs are not accessible without a valid session
 	- Or make public / private report types and only let viewers access public ones
 - **HTTPS session hardening** — set `cookie: { secure: true }` behind the reverse proxy
+- **Create my own Chart.js** - I would create my own charting script instead of the 3rd party call for performance and customizability benefits

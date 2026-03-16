@@ -58,3 +58,5 @@ These are disclosed upfront in the spirit of accountability:
 - **`cookie: { secure: false }`** — The session cookie is not set to secure-only. Since the site runs over HTTPS this should be `true` in production. It was left `false` to avoid issues during development.
 
 - **No pagination on tables** — The orders and customers views fetch and render all rows. This is fine for the current dataset size but would degrade with large volumes of data with tens of thousands of data entries.
+
+- **Chart.js** - Using a third party charting tool is quick and easy, but creating your own has customizable and performance benefits as discussed in class. Protocol > Platform!
