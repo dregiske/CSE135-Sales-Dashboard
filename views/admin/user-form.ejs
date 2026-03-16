@@ -1,0 +1,45 @@
+<%- include('../components/header') %>
+<%- include('../components/navbar') %>
+
+<div class="container">
+    <h1><%= editUser ? 'Edit User' : 'New User' %></h1>
+
+    <% if (error) { %>
+        <p class="error"><%= error %></p>
+    <% } %>
+
+    <form action="/admin/users/<%= editUser ? editUser.id + '/edit' : 'new' %>" method="POST" class="form">
+        <label>Username</label>
+        <% if (editUser) { %>
+            <input type="text" value="<%= editUser.username %>" disabled />
+        <% } else { %>
+            <input type="text" name="username" required />
+        <% } %>
+
+        <label>Password <%= editUser ? '(leave blank to keep current)' : '' %></label>
+        <input type="password" name="password" <%= editUser ? '' : 'required' %> />
+
+        <label>Role</label>
+        <select name="role">
+            <option value="superadmin" <%= editUser && editUser.role === 'superadmin' ? 'selected' : '' %>>Super Admin</option>
+            <option value="analyst" <%= editUser && editUser.role === 'analyst' ? 'selected' : '' %>>Analyst</option>
+            <option value="viewer" <%= editUser && editUser.role === 'viewer' ? 'selected' : '' %>>Viewer</option>
+        </select>
+
+        <label>Sections (for analysts)</label>
+        <div class="sections-grid">
+            <% sections.forEach(section => { %>
+            <label class="checkbox-label">
+                <input type="checkbox" name="sections" value="<%= section %>"
+                    <%= editUser && editUser.sections.includes(section) ? 'checked' : '' %> />
+                <%= section %>
+            </label>
+            <% }) %>
+        </div>
+
+        <button type="submit" class="btn"><%= editUser ? 'Save Changes' : 'Create User' %></button>
+        <a href="/admin/users">Cancel</a>
+    </form>
+</div>
+
+<%- include('../components/footer') %>

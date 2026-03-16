@@ -1,0 +1,42 @@
+<%- include('../components/header') %>
+<%- include('../components/navbar') %>
+
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h1>Admin — User Management</h1>
+        <a href="/admin/users/new" class="btn">+ New User</a>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Sections</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach(u => { %>
+            <% const userSections = JSON.parse(u.sections || '[]'); %>
+            <tr>
+                <td><%= u.id %></td>
+                <td><%= u.username %></td>
+                <td><span class="role-badge role-<%= u.role %>"><%= u.role %></span></td>
+                <td><%= userSections.length ? userSections.join(', ') : '—' %></td>
+                <td>
+                    <a href="/admin/users/<%= u.id %>/edit">Edit</a>
+                    <% if (u.id !== user.id) { %>
+                    <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline">
+                        <button type="submit" onclick="return confirm('Delete <%= u.username %>?')">Delete</button>
+                    </form>
+                    <% } %>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<%- include('../components/footer') %>
