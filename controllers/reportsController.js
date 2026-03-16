@@ -1,7 +1,18 @@
 const orderModel = require('../models/orderModel');
 const reportCommentModel = require('../models/reportCommentModel');
+const savedReportModel = require('../models/savedReportModel');
 
 exports.showReports = (req, res) => {
+    const savedReports = savedReportModel.getAll();
+
+    // Viewers only see the saved reports list
+    if (req.session.user.role === 'viewer') {
+        return res.render('reports', {
+            user: req.session.user,
+            savedReports,
+        });
+    }
+
     const monthlyRevenue = orderModel.getMonthlyRevenue();
     const ordersByStatus = orderModel.getOrdersByStatus();
     const revenueByRegion = orderModel.getRevenueByRegion();
@@ -14,6 +25,7 @@ exports.showReports = (req, res) => {
 
     res.render('reports', {
         user: req.session.user,
+        savedReports,
         monthlyRevenue: JSON.stringify(monthlyRevenue),
         ordersByStatus: JSON.stringify(ordersByStatus),
         revenueByRegion: JSON.stringify(revenueByRegion),
