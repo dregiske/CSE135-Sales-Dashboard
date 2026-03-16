@@ -38,9 +38,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   // Parse data passed from controller
-  const monthlyRevenue = JSON.parse("<%- monthlyRevenue %>");
-  const ordersByStatus = JSON.parse("<%- ordersByStatus %>");
-  const revenueByRegion = JSON.parse("<%- revenueByRegion %>");
+  const monthlyRevenue = <%- monthlyRevenue %>;
+  const ordersByStatus = <%- ordersByStatus %>;
+  const revenueByRegion = <%- revenueByRegion %>;
 
   // Monthly Revenue Bar Chart
   new Chart(document.getElementById("monthlyRevenueChart"), {
