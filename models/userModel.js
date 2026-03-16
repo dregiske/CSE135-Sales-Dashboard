@@ -29,3 +29,9 @@ exports.updateUser = (id, role, sections) => {
 exports.deleteUser = (id) => {
   return db.prepare("DELETE FROM users WHERE id = ?").run(id);
 };
+
+exports.updatePassword = (id, hashedPassword) => {
+  return db
+    .prepare("UPDATE users SET password = ? WHERE id = ?")
+    .run(hashedPassword, id);
+};
