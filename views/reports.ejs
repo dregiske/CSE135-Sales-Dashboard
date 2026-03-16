@@ -4,9 +4,12 @@
 <div class="container">
   <div class="page-header">
     <h1>Saved <span>Reports</span></h1>
-    <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
-      <span style="font-size:0.8em; color:var(--text-muted);">Click <strong style="color:var(--accent)">Save Comment</strong> on any section to annotate</span>
-    <% } %>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <% if (user.role === 'analyst' || user.role === 'superadmin') { %>
+        <span style="font-size:0.8em; color:var(--text-muted);">Click <strong style="color:var(--accent)">Save Comment</strong> on any section to annotate</span>
+        <a href="/reports/export" class="btn-export">Export PDF</a>
+      <% } %>
+    </div>
   </div>
 
   <!-- ── 1. Revenue Summary ── -->
