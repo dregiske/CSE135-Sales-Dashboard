@@ -24,6 +24,10 @@ const authRouter = require('./routes/auth');
 app.use('/', indexRouter);
 app.use('/', authRouter);
 
+app.use((_req, res) => {
+    res.status(404).render('404');
+});
+
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
